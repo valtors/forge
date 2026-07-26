@@ -168,7 +168,7 @@ forge is the runtime. these are the modules:
 
 ## tests
 
-100 tests. all pass.
+100 tests. 73.3% coverage. all pass.
 
 ```bash
 go test ./... -count=1
