@@ -3,7 +3,7 @@
 [![CI](https://github.com/valtors/forge/actions/workflows/ci.yml/badge.svg)](https://github.com/valtors/forge/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0F172A?style=flat-square)](./LICENSE)
 [![Go](https://img.shields.io/badge/go-1.23+-00ADD8?style=flat-square)](https://go.dev/)
-[![tests](https://img.shields.io/badge/tests-91-green?style=flat-square)]()
+[![tests](https://img.shields.io/badge/tests-100-green?style=flat-square)]()
 
 local-first agent runtime. one binary. memory, sandboxing, observation, security, package management. agents run on top.
 
@@ -80,6 +80,19 @@ forge/
   commands.go      command handlers (run, list, logs, kill, init)
 ```
 
+/## memory commands
+
+forge also manages agent memory directly from the CLI:
+
+```
+forge remember my-agent alice uses linux
+forge recall my-agent
+forge recall my-agent alice
+forge forget my-agent alice uses
+```
+
+memory persists across restarts. stored in sqlite. one file per agent.
+
 ## what it does when you run `forge run`
 
 1. loads your agent.toml
@@ -150,7 +163,7 @@ forge is the runtime. these are the modules:
 
 ## tests
 
-91 tests. all pass.
+100 tests. all pass.
 
 ```bash
 go test ./... -count=1

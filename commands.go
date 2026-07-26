@@ -238,3 +238,110 @@ func validateCmd(args []string) int {
 
 	return 0
 }
+
+func rememberCmd(args []string) int {
+	if len(args) < 3 {
+		fmt.Fprintln(os.Stderr, "usage: forge remember <agent-name> <subject> <predicate> <object>")
+		return 1
+	}
+
+	agentName := args[0]
+	subject := args[1]
+	predicate := args[2]
+	object := ""
+	if len(args) > 3 {
+		object = args[3]
+	}
+
+	dataDir := filepath.Join(config.DataDir(), "forge")
+	memPath := filepath.Join(dataDir, agentName, "memory.db")
+
+	mem, err := memory.New(memPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "memory: %v\n", err)
+		return 1
+	}
+	defer mem.Close()
+
+	if err := mem.Remember(subject, predicate, object); err != nil {
+		fmt.Fprintf(os.Stderr, "remember: %v\n", err)
+		return 1
+	}
+
+	fmt.Printf("remembered: %s %s %s\n", subject, predicate, object)
+	return 0
+}
+
+func recallCmd(args []string) int {
+	if len(args) < 1 {
+		fmt.Fprintln(os.Stderr, "usage: forge recall <agent-name> [query]")
+		return 1
+	}
+
+	agentName := args[0]
+	query := ""
+	if len(args) > 1 {
+		query = args[1]
+	}
+
+	dataDir := filepath.Join(config.DataDir(), "forge")
+	memPath := filepath.Join(dataDir, agentName, "memory.db")
+
+	mem, err := memory.New(memPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "memory: %v\n", err)
+		return 1
+	}
+	defer mem.Close()
+
+	if query == "" {
+		facts, err := mem.All()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "recall: %v\n", err)
+			return 1
+		}
+		for _, f := range facts {
+			fmt.Printf("%s %s %s\n", f.Subject, f.Predicate, f.Object)
+		}
+		return 0
+	}
+
+	facts, err := mem.Recall(query, 20)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "recall: %v\n", err)
+		return 1
+	}
+	for _, f := range facts {
+		fmt.Printf("%s %s %s\n", f.Subject, f.Predicate, f.Object)
+	}
+	return 0
+}
+
+func forgetCmd(args []string) int {
+	if len(args) < 3 {
+		fmt.Fprintln(os.Stderr, "usage: forge forget <agent-name> <subject> <predicate>")
+		return 1
+	}
+
+	agentName := args[0]
+	subject := args[1]
+	predicate := args[2]
+
+	dataDir := filepath.Join(config.DataDir(), "forge")
+	memPath := filepath.Join(dataDir, agentName, "memory.db")
+
+	mem, err := memory.New(memPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "memory: %v\n", err)
+		return 1
+	}
+	defer mem.Close()
+
+	if err := mem.Forget(subject, predicate); err != nil {
+		fmt.Fprintf(os.Stderr, "forget: %v\n", err)
+		return 1
+	}
+
+	fmt.Printf("forgotten: %s %s\n", subject, predicate)
+	return 0
+}

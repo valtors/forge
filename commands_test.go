@@ -134,3 +134,109 @@ func TestStatusCmd(t *testing.T) {
 func TestPrintHelp(t *testing.T) {
 	printHelp()
 }
+
+func TestRememberCmd(t *testing.T) {
+	dir := t.TempDir()
+	oldDir, _ := os.Getwd()
+	defer os.Chdir(oldDir)
+	os.Chdir(dir)
+
+	original := os.Getenv("XDG_DATA_HOME")
+	defer os.Setenv("XDG_DATA_HOME", original)
+	os.Setenv("XDG_DATA_HOME", dir)
+
+	code := rememberCmd([]string{"test-agent", "alice", "uses", "linux"})
+	if code != 0 {
+		t.Fatalf("rememberCmd returned %d", code)
+	}
+}
+
+func TestRememberCmd_NoArgs(t *testing.T) {
+	code := rememberCmd([]string{})
+	if code == 0 {
+		t.Error("should return non-zero with no args")
+	}
+}
+
+func TestRememberCmd_ThreeArgs(t *testing.T) {
+	dir := t.TempDir()
+	original := os.Getenv("XDG_DATA_HOME")
+	defer os.Setenv("XDG_DATA_HOME", original)
+	os.Setenv("XDG_DATA_HOME", dir)
+
+	code := rememberCmd([]string{"test-agent", "alice", "uses"})
+	if code != 0 {
+		t.Errorf("rememberCmd with 3 args returned %d", code)
+	}
+}
+
+func TestRecallCmd_All(t *testing.T) {
+	dir := t.TempDir()
+	original := os.Getenv("XDG_DATA_HOME")
+	defer os.Setenv("XDG_DATA_HOME", original)
+	os.Setenv("XDG_DATA_HOME", dir)
+
+	rememberCmd([]string{"test-agent", "alice", "uses", "linux"})
+	code := recallCmd([]string{"test-agent"})
+	if code != 0 {
+		t.Errorf("recallCmd returned %d", code)
+	}
+}
+
+func TestRecallCmd_WithQuery(t *testing.T) {
+	dir := t.TempDir()
+	original := os.Getenv("XDG_DATA_HOME")
+	defer os.Setenv("XDG_DATA_HOME", original)
+	os.Setenv("XDG_DATA_HOME", dir)
+
+	rememberCmd([]string{"test-agent", "alice", "uses", "linux"})
+	code := recallCmd([]string{"test-agent", "alice"})
+	if code != 0 {
+		t.Errorf("recallCmd returned %d", code)
+	}
+}
+
+func TestRecallCmd_NoArgs(t *testing.T) {
+	code := recallCmd([]string{})
+	if code == 0 {
+		t.Error("should return non-zero with no args")
+	}
+}
+
+func TestForgetCmd(t *testing.T) {
+	dir := t.TempDir()
+	original := os.Getenv("XDG_DATA_HOME")
+	defer os.Setenv("XDG_DATA_HOME", original)
+	os.Setenv("XDG_DATA_HOME", dir)
+
+	rememberCmd([]string{"test-agent", "alice", "uses", "linux"})
+	code := forgetCmd([]string{"test-agent", "alice", "uses"})
+	if code != 0 {
+		t.Errorf("forgetCmd returned %d", code)
+	}
+}
+
+func TestForgetCmd_NoArgs(t *testing.T) {
+	code := forgetCmd([]string{})
+	if code == 0 {
+		t.Error("should return non-zero with no args")
+	}
+}
+
+func TestValidateCmd_NoArgs(t *testing.T) {
+	dir := t.TempDir()
+	oldDir, _ := os.Getwd()
+	defer os.Chdir(oldDir)
+	os.Chdir(dir)
+
+	os.WriteFile("agent.toml", []byte(`
+[agent]
+name = "test"
+model = "claude"
+`), 0644)
+
+	code := validateCmd([]string{})
+	if code != 0 {
+		t.Errorf("validateCmd with default path returned %d", code)
+	}
+}

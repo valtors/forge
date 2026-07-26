@@ -30,6 +30,12 @@ func main() {
 		code = statusCmd(args)
 	case "validate":
 		code = validateCmd(args)
+	case "remember":
+		code = rememberCmd(args)
+	case "recall":
+		code = recallCmd(args)
+	case "forget":
+		code = forgetCmd(args)
 	case "version":
 		fmt.Println("forge 0.1.0")
 	case "help", "-h", "--help":
@@ -52,6 +58,9 @@ usage:
   forge list               show running agents
   forge status             show forge status (agents, logs, memory)
   forge validate [config]  validate an agent config
+  forge remember <agent> <s> <p> <o>  store a fact
+  forge recall <agent> [query]        query agent memory
+  forge forget <agent> <s> <p>       remove a fact
   forge logs [agent]       show logs for an agent
   forge kill [agent]       stop a running agent
   forge version            show version
