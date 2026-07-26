@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 )
 
@@ -35,7 +34,7 @@ func Resolve(name string) (*Server, error) {
 	}
 
 	if _, err := os.Stat(name); err == nil {
-		abs, _ := absPath(name)
+		abs, _ := filepath.Abs(name)
 		return &Server{
 			Name: abs,
 			Path: abs,
@@ -72,17 +71,4 @@ func (s *Server) MCPConfig() map[string]interface{} {
 
 func (s *Server) String() string {
 	return fmt.Sprintf("%s -> %s %s", s.Name, s.Path, strings.Join(s.Args, " "))
-}
-
-func absPath(p string) (string, error) {
-	if runtime.GOOS == "windows" {
-		abs, err := filepath.Abs(p)
-		return abs, err
-	}
-	abs, err := filepath.Abs(p)
-	return abs, err
-}
-
-func filepath_Abs(p string) (string, error) {
-	return filepath.Abs(p)
 }
