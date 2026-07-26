@@ -1,0 +1,20 @@
+[agent]
+name = "research-agent"
+model = "claude-sonnet"
+command = "claude"
+
+[memory]
+backend = "cairn"
+path = "~/.local/share/forge/research-agent/memory.db"
+
+[sandbox]
+enabled = true
+allow = ["./src", "./docs"]
+net = ["github.com", "api.github.com", "*.npmjs.org"]
+
+[mcp]
+servers = ["@modelcontextprotocol/server-filesystem", "@modelcontextprotocol/server-git"]
+
+[observe]
+log = true
+trace = true

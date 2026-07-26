@@ -1,0 +1,20 @@
+[agent]
+name = "code-agent"
+model = "claude-sonnet"
+command = "claude"
+
+[memory]
+backend = "cairn"
+path = "~/.local/share/forge/code-agent/memory.db"
+
+[sandbox]
+enabled = true
+allow = ["./src", "./test", "./go.mod", "./go.sum"]
+net = ["proxy.golang.org", "golang.org", "pkg.go.dev"]
+
+[mcp]
+servers = ["@modelcontextprotocol/server-filesystem", "git"]
+
+[observe]
+log = true
+trace = true
