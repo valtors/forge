@@ -145,3 +145,86 @@ func TestIsSecret(t *testing.T) {
 		}
 	}
 }
+
+func TestAllowedPath_Disabled(t *testing.T) {
+	c := New(false, []string{}, []string{})
+	if !c.AllowedPath("/anywhere/random") {
+		t.Error("disabled sandbox should allow all paths")
+	}
+}
+
+func TestSanitizeEnv_Empty(t *testing.T) {
+	c := New(true, []string{}, []string{})
+	clean := c.SanitizeEnv([]string{})
+	if len(clean) != 0 {
+		t.Errorf("got %d, want 0", len(clean))
+	}
+}
+
+func TestSanitizeEnv_MultipleSecrets(t *testing.T) {
+	c := New(true, []string{}, []string{})
+	env := []string{
+		"PATH=/usr/bin",
+		"GITHUB_TOKEN=xxx",
+		"OPENAI_API_KEY=xxx",
+		"ANTHROPIC_API_KEY=xxx",
+		"AWS_SECRET_ACCESS_KEY=xxx",
+		"AZURE_CLIENT_SECRET=xxx",
+		"DATABASE_URL=xxx",
+		"PRIVATE_KEY=xxx",
+		"HOME=/home/user",
+	}
+	clean := c.SanitizeEnv(env)
+	if len(clean) != 2 {
+		t.Errorf("got %d, want 2 (PATH and HOME only)", len(clean))
+	}
+}
+
+func TestAllowedHost_Wildcard(t *testing.T) {
+	c := New(true, []string{}, []string{"*.github.com"})
+
+	if !c.AllowedHost("api.github.com") {
+		t.Error("api.github.com should match *.github.com")
+	}
+	if !c.AllowedHost("raw.github.com") {
+		t.Error("raw.github.com should match *.github.com")
+	}
+	if c.AllowedHost("github.com") {
+		t.Error("github.com should NOT match *.github.com")
+	}
+}
+
+func TestAllowedHost_ExactMatch(t *testing.T) {
+	c := New(true, []string{}, []string{"github.com"})
+
+	if !c.AllowedHost("github.com") {
+		t.Error("exact match should work")
+	}
+	if c.AllowedHost("api.github.com") {
+		t.Error("should not match wildcard when only exact specified")
+	}
+}
+
+func TestIsSecret_CaseInsensitive(t *testing.T) {
+	if !isSecret("github_token") {
+		t.Error("lowercase github_token should be secret")
+	}
+	if !isSecret("GITHUB_TOKEN") {
+		t.Error("uppercase GITHUB_TOKEN should be secret")
+	}
+	if !isSecret("Github_Token") {
+		t.Error("mixed case should be secret")
+	}
+}
+
+func TestIsSecret_NotSecret(t *testing.T) {
+	if isSecret("EDITOR") {
+		t.Error("EDITOR should not be secret")
+	}
+	if isSecret("SHELL") {
+		t.Error("SHELL should not be secret")
+	}
+	if isSecret("TERM") {
+		t.Error("TERM should not be secret")
+	}
+}

@@ -12,17 +12,24 @@ func main() {
 	}
 
 	cmd := os.Args[1]
+	args := os.Args[2:]
+
+	var code int
 	switch cmd {
 	case "run":
-		runCmd(os.Args[2:])
+		code = runCmd(args)
 	case "list":
-		listCmd(os.Args[2:])
+		code = listCmd(args)
 	case "logs":
-		logsCmd(os.Args[2:])
+		code = logsCmd(args)
 	case "kill":
-		killCmd(os.Args[2:])
+		code = killCmd(args)
 	case "init":
-		initCmd(os.Args[2:])
+		code = initCmd(args)
+	case "status":
+		code = statusCmd(args)
+	case "validate":
+		code = validateCmd(args)
 	case "version":
 		fmt.Println("forge 0.1.0")
 	case "help", "-h", "--help":
@@ -30,8 +37,10 @@ func main() {
 	default:
 		fmt.Fprintf(os.Stderr, "unknown command: %s\n\n", cmd)
 		printHelp()
-		os.Exit(1)
+		code = 1
 	}
+
+	os.Exit(code)
 }
 
 func printHelp() {
@@ -41,6 +50,8 @@ usage:
   forge init [name]        create an agent config
   forge run [config]       start an agent with all services wired
   forge list               show running agents
+  forge status             show forge status (agents, logs, memory)
+  forge validate [config]  validate an agent config
   forge logs [agent]       show logs for an agent
   forge kill [agent]       stop a running agent
   forge version            show version

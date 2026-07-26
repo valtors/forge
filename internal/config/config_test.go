@@ -131,3 +131,54 @@ func TestDataDir(t *testing.T) {
 		t.Error("DataDir should not be empty")
 	}
 }
+
+func TestLoad_InvalidTOML(t *testing.T) {
+	tmp := t.TempDir()
+	path := filepath.Join(tmp, "agent.toml")
+	os.WriteFile(path, []byte("not valid toml [[["), 0644)
+
+	_, err := Load(path)
+	if err == nil {
+		t.Error("should error on invalid TOML")
+	}
+}
+
+func TestSave_Overwrite(t *testing.T) {
+	tmp := t.TempDir()
+	path := filepath.Join(tmp, "agent.toml")
+
+	cfg1 := Default("first")
+	cfg1.Save(path)
+
+	cfg2 := Default("second")
+	cfg2.Save(path)
+
+	loaded, _ := Load(path)
+	if loaded.Agent.Name != "second" {
+		t.Errorf("name = %s, want second (overwritten)", loaded.Agent.Name)
+	}
+}
+
+func TestDefault_MemoryPath(t *testing.T) {
+	cfg := Default("custom-agent")
+	if cfg.Memory.Path == "" {
+		t.Error("memory path should not be empty")
+	}
+}
+
+func TestDefault_SandboxEnabled(t *testing.T) {
+	cfg := Default("test")
+	if !cfg.Sandbox.Enabled {
+		t.Error("sandbox should be enabled by default")
+	}
+}
+
+func TestDefault_ObserveDefaults(t *testing.T) {
+	cfg := Default("test")
+	if !cfg.Observe.Log {
+		t.Error("log should be true by default")
+	}
+	if !cfg.Observe.Trace {
+		t.Error("trace should be true by default")
+	}
+}

@@ -3,7 +3,7 @@
 [![CI](https://github.com/valtors/forge/actions/workflows/ci.yml/badge.svg)](https://github.com/valtors/forge/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0F172A?style=flat-square)](./LICENSE)
 [![Go](https://img.shields.io/badge/go-1.23+-00ADD8?style=flat-square)](https://go.dev/)
-[![tests](https://img.shields.io/badge/tests-38-green?style=flat-square)]()
+[![tests](https://img.shields.io/badge/tests-91-green?style=flat-square)]()
 
 local-first agent runtime. one binary. memory, sandboxing, observation, security, package management. agents run on top.
 
@@ -150,7 +150,7 @@ forge is the runtime. these are the modules:
 
 ## tests
 
-38 tests. all pass.
+91 tests. all pass.
 
 ```bash
 go test ./... -count=1

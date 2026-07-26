@@ -112,3 +112,79 @@ func TestNew_FileDB(t *testing.T) {
 		t.Errorf("got %d facts after reopen, want 1", len(facts))
 	}
 }
+
+func TestNew_InvalidPath(t *testing.T) {
+	_, err := New("/nonexistent/path/that/does/not/exist/db.db")
+	if err == nil {
+		t.Error("should error on invalid path")
+	}
+}
+
+func TestRecall_LimitOne(t *testing.T) {
+	s, _ := New("")
+	defer s.Close()
+
+	s.Remember("alice", "uses", "linux")
+	s.Remember("alice", "likes", "go")
+
+	facts, err := s.Recall("alice", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(facts) != 1 {
+		t.Errorf("got %d, want 1 (limit)", len(facts))
+	}
+}
+
+func TestRemember_Duplicate(t *testing.T) {
+	s, _ := New("")
+	defer s.Close()
+
+	s.Remember("alice", "uses", "linux")
+	s.Remember("alice", "uses", "linux")
+
+	facts, _ := s.All()
+	if len(facts) != 2 {
+		t.Errorf("got %d facts, want 2 (duplicates allowed)", len(facts))
+	}
+}
+
+func TestForget_NotFound(t *testing.T) {
+	s, _ := New("")
+	defer s.Close()
+
+	err := s.Forget("nonexistent", "predicate")
+	if err != nil {
+		t.Errorf("forget nonexistent should not error: %v", err)
+	}
+}
+
+func TestAll_Empty(t *testing.T) {
+	s, _ := New("")
+	defer s.Close()
+
+	facts, err := s.All()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(facts) != 0 {
+		t.Errorf("got %d, want 0", len(facts))
+	}
+}
+
+func TestAll_AfterForget(t *testing.T) {
+	s, _ := New("")
+	defer s.Close()
+
+	s.Remember("alice", "uses", "linux")
+	s.Remember("bob", "uses", "macos")
+	s.Forget("alice", "uses")
+
+	facts, _ := s.All()
+	if len(facts) != 1 {
+		t.Errorf("got %d, want 1 after forget", len(facts))
+	}
+	if facts[0].Subject != "bob" {
+		t.Errorf("remaining fact subject = %s, want bob", facts[0].Subject)
+	}
+}

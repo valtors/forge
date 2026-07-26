@@ -148,3 +148,93 @@ func TestLogFileWritten(t *testing.T) {
 		t.Error("log file should not be empty")
 	}
 }
+
+func TestNewLogger_InvalidDir(t *testing.T) {
+	_, err := NewLogger("/nonexistent/path/that/does/not/exist", "test", true, true)
+	if err == nil {
+		t.Error("should error on invalid dir")
+	}
+}
+
+func TestLog_Error(t *testing.T) {
+	tmp := t.TempDir()
+	l, _ := NewLogger(tmp, "test", true, false)
+	defer l.Close()
+
+	l.Log(Entry{
+		Timestamp: time.Now(),
+		AgentID:   "test",
+		Tool:      "failing_tool",
+		Error:     "permission denied",
+	})
+
+	history := l.History(10)
+	if len(history) != 1 {
+		t.Fatalf("got %d, want 1", len(history))
+	}
+	if history[0].Error != "permission denied" {
+		t.Errorf("error = %s", history[0].Error)
+	}
+}
+
+func TestSearch_NoMatch(t *testing.T) {
+	tmp := t.TempDir()
+	l, _ := NewLogger(tmp, "test", true, false)
+	defer l.Close()
+
+	l.Log(Entry{Timestamp: time.Now(), Tool: "read_file", Input: "test"})
+
+	results := l.Search("nonexistent", 10)
+	if len(results) != 0 {
+		t.Errorf("got %d, want 0", len(results))
+	}
+}
+
+func TestSearch_Limit(t *testing.T) {
+	tmp := t.TempDir()
+	l, _ := NewLogger(tmp, "test", true, false)
+	defer l.Close()
+
+	for i := 0; i < 10; i++ {
+		l.Log(Entry{Timestamp: time.Now(), Tool: "read_file"})
+	}
+
+	results := l.Search("read", 3)
+	if len(results) != 3 {
+		t.Errorf("got %d, want 3 (limited)", len(results))
+	}
+}
+
+func TestHistory_All(t *testing.T) {
+	tmp := t.TempDir()
+	l, _ := NewLogger(tmp, "test", true, false)
+	defer l.Close()
+
+	for i := 0; i < 5; i++ {
+		l.Log(Entry{Timestamp: time.Now(), Tool: "tool"})
+	}
+
+	history := l.History(0)
+	if len(history) != 5 {
+		t.Errorf("got %d, want 5 (0 = all)", len(history))
+	}
+}
+
+func TestStats_Empty(t *testing.T) {
+	tmp := t.TempDir()
+	l, _ := NewLogger(tmp, "test", true, false)
+	defer l.Close()
+
+	stats := l.Stats()
+	if len(stats) != 0 {
+		t.Errorf("got %d stats, want 0", len(stats))
+	}
+}
+
+func TestClose_DoubleClose(t *testing.T) {
+	tmp := t.TempDir()
+	l, _ := NewLogger(tmp, "test", true, false)
+
+	l.Close()
+	l.Close()
+}
