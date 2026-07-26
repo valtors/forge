@@ -1,1 +1,5 @@
+forge
 coverage.out
+*.db
+*.log
+.DS_Store
