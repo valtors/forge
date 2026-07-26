@@ -15,6 +15,11 @@ forge is the operating system for AI agents. you write a config file. forge hand
 forge init my-agent
 forge run my-agent.toml
 forge list
+forge status
+forge validate my-agent.toml
+forge remember my-agent alice uses linux
+forge recall my-agent
+forge forget my-agent alice uses
 forge logs my-agent-1234567890
 forge kill my-agent-1234567890
 ```
