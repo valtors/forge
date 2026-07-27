@@ -7,6 +7,8 @@
 
 local-first agent runtime. one binary. memory, sandboxing, observation, security, package management. agents run on top.
 
+[landing](https://valtors.github.io/forge/) - [github](https://github.com/valtors/forge)
+
 ## what
 
 forge is the operating system for AI agents. you write a config file. forge handles everything else.
@@ -85,7 +87,7 @@ forge/
   commands.go      command handlers (run, list, logs, kill, init)
 ```
 
-/## memory commands
+## memory commands
 
 forge also manages agent memory directly from the CLI:
 
@@ -177,6 +179,12 @@ go test ./... -count=1
 ## tech
 
 go. single binary. sqlite (pure-go, no cgo for memory store). toml config. stdlib everything else. boring tech on purpose.
+
+## contributing
+
+see [CONTRIBUTING.md](CONTRIBUTING.md). we welcome contributions of all kinds - bug fixes, new patterns, transport support, docs.
+
+good first issues are labeled `good first issue`.
 
 ## license
 
